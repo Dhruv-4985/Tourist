@@ -1,0 +1,27 @@
+{% include "header.html" %}
+{% load static %}
+<br><br><br><br>
+
+<div class="container py-5">
+    <h2 class="text-center mb-4">User Profile</h2>
+    
+    <div class="card p-4">
+        <h4>Name: {{ user.username }}</h4>
+        <h5>Email: {{ user.email }}</h5>
+        <h5>Phone: {{ booking.phone }}</h5>  <!-- Assuming phone is in User Profile model -->
+    </div>
+
+    <h3 class="mt-4">Your Bookings</h3>
+    <ul class="list-group">
+        {% for booking in bookings %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ booking.package.title }}
+                <a href="{% url 'booking_ticket' booking.id %}" class="btn btn-primary btn-sm">Download PDF</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No bookings yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% include "footer.html" %}

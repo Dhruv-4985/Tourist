@@ -1,0 +1,92 @@
+{% include "header.html" %}
+{% load static %}
+
+<div class="container-fluid bg-primary py-5 mb-5 hero-header">
+    <div class="container py-5">
+        <div class="row justify-content-center py-5">
+            <div class="col-lg-10 pt-lg-5 mt-lg-5 text-center">
+                <h1 class="display-3 text-white mb-3">{{ package.title }}</h1>
+                <p class="fs-4 text-white">{{ package.short_description }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <img src="{{ package.image.url }}" class="img-fluid rounded mb-4" alt="{{ package.title }}">
+            <h2>{{ package.title }}</h2>
+            <p>{{ package.description }}</p>
+
+            <h4>Package Includes:</h4>
+            <pre>{{ package.inclusions }}</pre>
+
+            <h4 class="mt-4">Location:</h4>
+            <p><i class="fa fa-map-marker-alt text-primary"></i> {{ package.location }}</p>
+
+            
+            <!-- Google Map Section with Login Restriction -->
+{% if user.is_authenticated %}
+{% if package.location_map %}
+<div class="mt-4 mb-3">
+    <h4>Package Location</h4>
+    <div class="embed-responsive embed-responsive-16by9">
+        {{ package.location_map|safe }} <!-- Show map for logged-in users -->
+    </div>
+</div>
+{% endif %}
+{% else %}
+<div class="mt-4 mb-3 text-center">
+<h4>Package Location</h4>
+<div class="alert alert-warning">
+    To see the map view, please <a href="{% url 'login' %}" class="text-primary">login</a> first.
+</div>
+</div>
+{% endif %}
+            <!-- Google Map Section End -->
+
+            <!-- Suggested Packages Section -->
+            <h4 class="mt-4">Suggested Packages</h4>
+            <div class="row mb-3">
+                {% for suggestion in suggested_packages %}
+                <div class="col-md-3 mb-3">
+                    <div class="card">
+                        <img src="{{ suggestion.image.url }}" class="card-img-top" alt="{{ suggestion.title }}">
+                        <div class="card-body">
+                            <h5>{{ suggestion.title }}</h5>
+                            <p>₹{{ suggestion.price }}</p>
+                            <a href="{% url 'package_details' suggestion.id %}" class="btn btn-primary btn-sm">View Package</a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No suggestions available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="bg-light p-4 rounded">
+                <h3 class="text-primary">₹{{ package.price }}</h3>
+                <p><strong>Duration:</strong> {{ package.duration }} days</p>
+                <p><strong>Persons:</strong> {{ package.persons }}</p>
+                <p><strong>Type:</strong> {{ package.tour_type }}</p>
+                
+
+                <p><strong>Rating:</strong>
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= package.rating %}
+                            <i class="fa fa-star text-warning"></i>
+                        {% else %}
+                            <i class="fa fa-star text-muted"></i>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                <a href="{% url 'book_package' package.id %}" class="btn btn-primary w-100">Book Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "footer.html" %}

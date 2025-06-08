@@ -1,0 +1,12 @@
+{% include "header.html" %}
+{% load static %}
+
+<div class="container text-center py-5">
+    <h2 class="text-success">Booking Confirmed!</h2>
+    <p>Your booking for <strong>{{ booking.package.title }}</strong> is confirmed.</p>
+    <p><strong>Booking Date:</strong> {{ booking.booking_date }}</p>
+    <p><strong>Total Amount Paid:</strong> ₹{{ booking.total_amount }}</p>
+    <a href="/" class="btn btn-primary">Go to Home</a>
+</div>
+
+{% include "footer.html" %}

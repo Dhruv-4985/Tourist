@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .ticket {
+            border: 2px solid #4CAF50;
+            padding: 20px;
+            margin: 20px auto;
+            width: 600px;
+            text-align: left;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        p {
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+<h1>Booking Confirmation</h1>
+<div class="ticket">
+    <h2>{{ booking.full_name }}</h2>
+    <p><strong>Email:</strong> {{ booking.email }}</p>
+    <p><strong>Phone:</strong> {{ booking.phone }}</p>
+    <p><strong>Package:</strong> {{ booking.package.title }}</p>
+    <p><strong>Booking Date:</strong> {{ booking.booking_date }}</p>
+    <p><strong>Number of People:</strong> {{ booking.no_of_people }}</p>
+    <p><strong>Total Amount:</strong> ₹{{ booking.total_amount }}</p>
+    <p><strong>Payment Status:</strong> {{ booking.payment_status }}</p>
+</div>
+<a href="{% url 'booking_ticket' booking.id %}" class="btn btn-success" download>Download Ticket PDF</a>
+
+<a href="{% url 'home' %}">Go to Home</a>
+</body>
+</html>

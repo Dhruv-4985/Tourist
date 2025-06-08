@@ -1,0 +1,48 @@
+{% include "header.html" %}
+{% load static %}
+<br><br><br><br>
+
+<div class="container py-5">
+    <h2 class="text-center mb-4">My Bookings</h2>
+
+    <table class="table table-bordered mt-3">
+        <thead class="bg-success text-white">
+            <tr>
+                <th>Booking ID</th>
+                <th>Package Name</th>
+                <th>Booking Date</th>
+                <th>No. of People</th>
+                <th>Total Amount</th>
+                <th>Payment Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.id }}</td>
+                <td>{{ booking.package.title }}</td>
+                <td>{{ booking.booking_date }}</td>
+                <td>{{ booking.no_of_people }}</td>
+                <td>₹{{ booking.total_amount }}</td>
+                <td>
+                    {% if booking.payment_status == "Paid" %}
+                        <span class="badge bg-success">Paid</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'booking_ticket' booking.id %}" class="btn btn-primary btn-sm">Download Ticket</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">No bookings found!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% include "footer.html" %}
