@@ -127,122 +127,6 @@ def create_order(request):
 
 
 
-'''
-
-import json
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from packages.models import TourPackage, Order
-
-def payment_success(request):
-    """Handle successful payments and save order details"""
-    if request.method == "POST":  # ✅ Ensure only POST is accepted
-        try:
-            data = json.loads(request.body)  # Read JSON data from request
-            print("Received Data:", data)  # Debugging: Print received data
-
-            payment_id = data.get("razorpay_payment_id")
-            email = request.session.get("email")
-            package_id = request.session.get("package_id")
-
-            # Debugging: Print session values
-            print(f"Session Email: {email}, Session Package ID: {package_id}")
-
-            if not payment_id:
-                return JsonResponse({"status": "error", "message": "Payment ID missing!"})
-            if not email:
-                return JsonResponse({"status": "error", "message": "User email not found in session!"})
-            if not package_id:
-                return JsonResponse({"status": "error", "message": "Package ID missing in session!"})
-
-            package = get_object_or_404(TourPackage, id=package_id)
-
-            order = Order.objects.create(
-                user_email=email,
-                package=package,
-                order_id=f"ORD{package_id}{payment_id[-6:]}",  # Generate order ID
-                payment_id=payment_id,
-                amount=package.price
-            )
-
-            print("Order Saved:", order)  # Debugging: Print order saved message
-
-            return JsonResponse({
-                "status": "success",
-                "message": "Payment successful! Order saved.",
-                "order_id": order.order_id
-            })
-
-        except Exception as e:
-            print("Error:", str(e))
-            return JsonResponse({"status": "error", "message": str(e)})
-
-    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)  # ✅ Return 400 for invalid requests
-'''
-
-''''
-import json
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from packages.models import Package, Order
-
-def payment_success(request):
-    """Handle successful payments and save order details"""
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            payment_id = data.get("razorpay_payment_id")
-
-            # ✅ Debug: Print received payment data
-            print("Received Payment Data:", data)
-
-            # ✅ Retrieve session data safely
-            email = request.session.get("email")
-            package_id = request.session.get("package_id")
-
-            # ✅ Debug: Print session data
-            print("Session Data Retrieved: Email:", email, "Package ID:", package_id)
-
-            if not email or not package_id:
-                print("❌ ERROR: Session data missing!")
-                return JsonResponse({"status": "error", "message": "Session expired or missing!"})
-
-            package = get_object_or_404(Package, id=package_id)
-
-            # package = get_object_or_404(Package, id=package_id)
-
-            # ✅ Try to save order and catch database errors
-            try:
-                order = Order.objects.create(
-                    user_email=email,
-                    package=package,
-                    order_id=f"ORD{package_id}{payment_id[-6:]}",  
-                    payment_id=payment_id,
-                    amount=package.price
-                )
-                print("✅ Order saved successfully:", order)
-
-            except Exception as db_error:
-                print("❌ ERROR: Database issue while saving order:", db_error)
-                return JsonResponse({"status": "error", "message": f"Database error: {db_error}"})
-
-            # ✅ Clear session after successful payment
-            del request.session["email"]
-            del request.session["package_id"]
-            request.session.modified = True
-
-            return JsonResponse({
-                "status": "success",
-                "message": "Payment successful! Order saved.",
-                "order_id": order.order_id
-            })
-
-        except Exception as e:
-            print("❌ ERROR: Unexpected issue in payment_success view:", e)
-            return JsonResponse({"status": "error", "message": str(e)})
-
-    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
-'''
 import json
 from django.shortcuts import get_object_or_404
 from packages.models import Package, Order
@@ -318,33 +202,6 @@ def booking_confirmation(request):
     else:
         return redirect("home")
 
-'''
-def payment_success(request):
-    """Handle successful payments and save order details"""
-    try:
-        # Retrieve session data
-        email = request.session.get("email", None)
-        package_id = request.session.get("package_id", None)
-
-        if not email or not package_id:
-            raise ValueError("Missing session data")
-
-        # Retrieve the package
-        package = get_object_or_404(Package, id=package_id)
-
-        # Process payment and booking
-        print(f"✅ Payment Successful for {email}, Package: {package.title}")
-        return render(request, "payment_success.html", {"package": package})
-
-    except Exception as e:
-        print(f"❌ ERROR: Unexpected issue in payment_success view: {e}")
-        return render(request, "payment_error.html", {"error": str(e)})
-'''
-
-
-# def payment_success(request):
-#     return render(request, "payment_success.html")
-
 
 # Booking Success Page
 def booking_success(request):
@@ -384,48 +241,6 @@ def booking_show(request, booking_id):
         "booking": booking
     })
 
-'''
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse
-
-def generate_ticket_pdf(request, booking_id):
-    """Generate PDF Ticket"""
-    booking = get_object_or_404(Booking, id=booking_id)
-
-    # Create a PDF Response
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Ticket_{booking.id}.pdf"'
-
-    # Create PDF Canvas
-    p = canvas.Canvas(response)
-    p.setTitle(f"Ticket {booking.id}")
-
-    # Title
-    p.setFont("Helvetica-Bold", 20)
-    p.drawString(200, 800, "Booking Ticket Confirmation")
-
-    # Booking Details
-    p.setFont("Helvetica", 12)
-    p.drawString(100, 750, f"Booking ID: {booking.id}")
-    p.drawString(100, 730, f"Name: {booking.full_name}")
-    p.drawString(100, 710, f"Email: {booking.email}")
-    p.drawString(100, 690, f"Phone: {booking.phone}")
-    p.drawString(100, 670, f"Package: {booking.package.title}")
-    p.drawString(100, 650, f"Date: {booking.booking_date}")
-    p.drawString(100, 630, f"Number of People: {booking.no_of_people}")
-    p.drawString(100, 610, f"Total Amount: ₹{booking.total_amount}")
-    p.drawString(100, 590, f"Payment Status: {booking.payment_status}")
-
-    # Footer
-    p.line(100, 550, 500, 550)
-    p.drawString(100, 530, "Thank You for Booking with Us!")
-    p.drawString(100, 510, "Safe Travels ✈️")
-
-    p.showPage()
-    p.save()
-
-    return response
-'''
 @login_required
 def all_bookings(request):
     bookings = Booking.objects.all()
@@ -503,9 +318,6 @@ def generate_ticket_pdf(request, booking_id):
     return response
 
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from packages.models import Booking
 
 @login_required
 def profile_view(request):
